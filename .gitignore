@@ -11,8 +11,10 @@ dist/
 .env.*.local
 
 # IDE
-.vscode/
+.vscode/*
 !.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
 .idea/
 
 # OS
