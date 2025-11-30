@@ -3,35 +3,38 @@ import type { LLMProvider, LLMResponse } from '../types/index.js';
 // Cost per 1K tokens (in credits)
 // 1 credit ≈ $0.001 USD of inference cost
 export const COST_PER_1K_TOKENS: Record<string, { input: number; output: number }> = {
-  // OpenAI models
+  // OpenAI models (latest 2024-2025)
   'gpt-4o': { input: 2.5, output: 10 },
   'gpt-4o-mini': { input: 0.15, output: 0.6 },
-  'gpt-4-turbo': { input: 10, output: 30 },
-  'gpt-3.5-turbo': { input: 0.5, output: 1.5 },
+  'o1': { input: 15, output: 60 },
+  'o1-mini': { input: 3, output: 12 },
+  'o3-mini': { input: 1.1, output: 4.4 },
 
-  // Anthropic models
+  // Anthropic models (latest 2024-2025)
+  'claude-sonnet-4-20250514': { input: 3, output: 15 },
   'claude-3-5-sonnet-20241022': { input: 3, output: 15 },
   'claude-3-5-haiku-20241022': { input: 0.8, output: 4 },
   'claude-3-opus-20240229': { input: 15, output: 75 },
 
-  // Google models
+  // Google models (latest 2024-2025)
+  'gemini-2.0-flash': { input: 0.1, output: 0.4 },
+  'gemini-2.0-flash-lite': { input: 0.02, output: 0.08 },
   'gemini-1.5-pro': { input: 1.25, output: 5 },
   'gemini-1.5-flash': { input: 0.075, output: 0.3 },
-  'gemini-1.0-pro': { input: 0.5, output: 1.5 },
 };
 
-// Default models per provider
+// Default models per provider (set to best value/performance ratio)
 export const DEFAULT_MODELS: Record<string, string> = {
-  openai: 'gpt-4o-mini',
-  anthropic: 'claude-3-5-haiku-20241022',
-  gemini: 'gemini-1.5-flash',
+  openai: 'gpt-4o',
+  anthropic: 'claude-sonnet-4-20250514',
+  gemini: 'gemini-2.0-flash',
 };
 
 // Available models per provider
 export const AVAILABLE_MODELS: Record<string, string[]> = {
-  openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'],
-  anthropic: ['claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022', 'claude-3-opus-20240229'],
-  gemini: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.0-pro'],
+  openai: ['gpt-4o', 'gpt-4o-mini', 'o1', 'o1-mini', 'o3-mini'],
+  anthropic: ['claude-sonnet-4-20250514', 'claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022', 'claude-3-opus-20240229'],
+  gemini: ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-1.5-pro', 'gemini-1.5-flash'],
 };
 
 // Estimate token count from text (rough approximation)
@@ -82,4 +85,3 @@ export abstract class BaseLLMProvider implements LLMProvider {
     options?: { maxTokens?: number; systemPrompt?: string }
   ): Promise<LLMResponse>;
 }
-
