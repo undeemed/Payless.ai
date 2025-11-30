@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { ApiClient } from './api/client';
-import { SupabaseAuth } from './auth/supabase';
 import { AdsSidebarProvider } from './sidebar/AdsSidebarProvider';
 import { ChatPanelProvider } from './chat/ChatPanelProvider';
+import { ApiClient } from './api/client';
+import { SupabaseAuth } from './auth/supabase';
 
 let apiClient: ApiClient;
 let supabaseAuth: SupabaseAuth;
@@ -16,8 +16,8 @@ export function activate(context: vscode.ExtensionContext) {
   apiClient = new ApiClient(context);
   supabaseAuth = new SupabaseAuth(context);
 
-  // Initialize sidebar provider
-  adsSidebarProvider = new AdsSidebarProvider(context, apiClient, supabaseAuth);
+  // Initialize sidebar provider (embeds payless.chat/extension)
+  adsSidebarProvider = new AdsSidebarProvider(context);
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider('payless-ai.adsView', adsSidebarProvider)
   );
@@ -37,7 +37,6 @@ export function activate(context: vscode.ExtensionContext) {
           if (token) {
             await apiClient.setToken(token);
             vscode.window.showInformationMessage('Successfully signed in to Payless AI!');
-            adsSidebarProvider.refresh();
             chatPanelProvider.refresh();
           }
         }
@@ -52,7 +51,6 @@ export function activate(context: vscode.ExtensionContext) {
       if (token) {
         await apiClient.setToken(token);
         vscode.window.showInformationMessage('Successfully signed in!');
-        adsSidebarProvider.refresh();
         chatPanelProvider.refresh();
       }
     })
@@ -63,7 +61,6 @@ export function activate(context: vscode.ExtensionContext) {
       await supabaseAuth.signOut();
       await apiClient.clearToken();
       vscode.window.showInformationMessage('Signed out of Payless AI');
-      adsSidebarProvider.refresh();
       chatPanelProvider.refresh();
     })
   );
@@ -76,7 +73,6 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand('payless-ai.openChat', async () => {
-      // Focus on the chat panel
       await vscode.commands.executeCommand('payless-ai.chatView.focus');
     })
   );
@@ -98,4 +94,3 @@ async function checkAuthState() {
 export function deactivate() {
   // Cleanup
 }
-

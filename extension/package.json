@@ -100,6 +100,11 @@
           "type": "string",
           "default": "",
           "description": "Google AdSense Ad Slot ID for the sidebar"
+        },
+        "payless-ai.extensionPageUrl": {
+          "type": "string",
+          "default": "https://payless.chat/extension",
+          "description": "URL for the extension sidebar page"
         }
       }
     }
