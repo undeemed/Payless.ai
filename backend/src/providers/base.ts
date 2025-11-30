@@ -24,6 +24,7 @@ export const COST_PER_1K_TOKENS: Record<string, { input: number; output: number 
   'claude-3-5-haiku-20241022': { input: 0.8, output: 4 },
 
   // Google Gemini 3 series (2025)
+  'gemini-3-pro': { input: 4, output: 16 },
   'gemini-3': { input: 3, output: 12 },
   'gemini-3-thinking': { input: 8, output: 32 },  // Higher cost for reasoning
   // Google Gemini 2.5 series
@@ -64,6 +65,7 @@ export const AVAILABLE_MODELS: Record<string, string[]> = {
     'claude-3-5-haiku-20241022',
   ],
   gemini: [
+    'gemini-3-pro',
     'gemini-3',
     'gemini-3-thinking',
     'gemini-2.5-pro',
