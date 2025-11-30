@@ -20,6 +20,7 @@ export default function ExtensionPage() {
   const [creditsPerMinute, setCreditsPerMinute] = useState(10);
   const [isEarning, setIsEarning] = useState(false);
   const [lastEarnTime, setLastEarnTime] = useState<number | null>(null);
+  const [isDark, setIsDark] = useState(true);
 
   // Handle messages from parent (VS Code extension)
   const handleMessage = useCallback((event: MessageEvent) => {
@@ -35,6 +36,12 @@ export default function ExtensionPage() {
   }, []);
 
   useEffect(() => {
+    // Load theme preference
+    const saved = localStorage.getItem('payless-theme');
+    if (saved) {
+      setIsDark(saved === 'dark');
+    }
+
     // Listen for balance updates from parent
     window.addEventListener('message', handleMessage);
 
@@ -72,6 +79,12 @@ export default function ExtensionPage() {
     }
   }, [lastEarnTime]);
 
+  const toggleTheme = () => {
+    const newTheme = !isDark;
+    setIsDark(newTheme);
+    localStorage.setItem('payless-theme', newTheme ? 'dark' : 'light');
+  };
+
   // Format credits for display
   const formatCredits = (value: number) => {
     if (value >= 1000000) {
@@ -83,54 +96,76 @@ export default function ExtensionPage() {
     return Math.floor(value).toLocaleString();
   };
 
+  // Theme classes
+  const bg = isDark ? 'bg-[#0a0a0a]' : 'bg-white';
+  const text = isDark ? 'text-white' : 'text-black';
+  const textMuted = isDark ? 'text-neutral-400' : 'text-neutral-500';
+  const border = isDark ? 'border-white/10' : 'border-black/10';
+  const cardBg = isDark ? 'bg-[#111]' : 'bg-neutral-50';
+  const creditsBg = isDark ? 'bg-white text-black' : 'bg-black text-white';
+
   return (
-    <div className="min-h-screen bg-[#1e1e1e] text-white flex flex-col">
+    <div className={`min-h-screen ${bg} ${text} flex flex-col font-sans`}>
       {/* Compact Header */}
-      <header className="p-3 border-b border-white/10 flex-shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-sm">P</span>
+      <header className={`p-3 border-b ${border} flex-shrink-0`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className={`w-7 h-7 rounded-lg ${isDark ? 'bg-white' : 'bg-black'} ${isDark ? 'text-black' : 'text-white'} flex items-center justify-center font-bold text-sm`}>
+              P
+            </div>
+            <div>
+              <div className="font-semibold text-sm">Payless AI</div>
+              <div className={`text-[10px] ${textMuted}`}>Free AI, powered by ads</div>
+            </div>
           </div>
-          <div>
-            <div className="font-semibold text-sm">Payless AI</div>
-            <div className="text-[10px] text-gray-400">Free AI, powered by ads</div>
-          </div>
+          
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className={`w-8 h-8 rounded-lg ${cardBg} ${border} border flex items-center justify-center text-sm hover:opacity-80 transition-opacity`}
+            aria-label="Toggle theme"
+          >
+            {isDark ? '☀' : '☾'}
+          </button>
         </div>
       </header>
 
       {/* Credit Display */}
       <div className="p-3 flex-shrink-0">
-        <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl p-4 shadow-lg relative overflow-hidden">
+        <div className={`${creditsBg} rounded-xl p-4 relative overflow-hidden`}>
           {/* Earning animation background */}
           {isEarning && (
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
+            <div className={`absolute inset-0 ${isDark ? 'bg-black/10' : 'bg-white/10'}`} style={{
+              background: `linear-gradient(90deg, transparent, ${isDark ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)'}, transparent)`,
+              animation: 'shimmer 2s infinite',
+            }} />
           )}
           
           <div className="relative">
-            <div className="text-[10px] uppercase tracking-wider text-white/70 mb-1">Your Credits</div>
+            <div className={`text-[10px] uppercase tracking-wider ${isDark ? 'text-black/60' : 'text-white/60'} mb-1`}>Your Credits</div>
             <div className="text-3xl font-bold tabular-nums">
               {credits === null ? (
-                <span className="animate-pulse">---</span>
+                <span className="opacity-50">---</span>
               ) : (
                 formatCredits(credits)
               )}
             </div>
             
             {/* Earning indicator */}
-            <div className="text-xs text-white/70 mt-2 flex items-center gap-1">
+            <div className={`text-xs ${isDark ? 'text-black/60' : 'text-white/60'} mt-2 flex items-center gap-1`}>
               {isEarning ? (
                 <>
-                  <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                   <span>+{creditsPerMinute}/min</span>
                 </>
               ) : credits === null ? (
                 <>
-                  <span className="w-2 h-2 rounded-full bg-yellow-400" />
+                  <span className={`w-2 h-2 rounded-full ${isDark ? 'bg-black/30' : 'bg-white/30'}`} />
                   <span>Sign in to earn</span>
                 </>
               ) : (
                 <>
-                  <span className="w-2 h-2 rounded-full bg-gray-400" />
+                  <span className={`w-2 h-2 rounded-full ${isDark ? 'bg-black/30' : 'bg-white/30'}`} />
                   <span>Keep sidebar open to earn</span>
                 </>
               )}
@@ -141,14 +176,14 @@ export default function ExtensionPage() {
 
       {/* Earning Rate Info */}
       <div className="px-3 pb-2 flex-shrink-0">
-        <div className="bg-[#252526] rounded-lg p-3 border border-white/5">
+        <div className={`${cardBg} rounded-lg p-3 border ${border}`}>
           <div className="flex items-center justify-between text-xs">
-            <span className="text-gray-400">Earn rate</span>
-            <span className="text-green-400 font-medium">{creditsPerMinute} credits/min</span>
+            <span className={textMuted}>Earn rate</span>
+            <span className="font-medium">{creditsPerMinute} credits/min</span>
           </div>
           <div className="flex items-center justify-between text-xs mt-1">
-            <span className="text-gray-400">Per hour</span>
-            <span className="text-white/80">~{creditsPerMinute * 60} credits</span>
+            <span className={textMuted}>Per hour</span>
+            <span className={textMuted}>~{creditsPerMinute * 60} credits</span>
           </div>
         </div>
       </div>
@@ -156,7 +191,7 @@ export default function ExtensionPage() {
       {/* Ad Stack - Optimized for vertical sidebar */}
       <div className="flex-1 p-3 space-y-3 overflow-y-auto">
         {/* Ad Unit 1 - Large Rectangle */}
-        <div className="bg-[#252526] rounded-lg p-2 border border-white/5">
+        <div className={`${cardBg} rounded-lg p-2 border ${border}`}>
           <ins
             className="adsbygoogle"
             style={{ display: "block", minHeight: "250px" }}
@@ -168,7 +203,7 @@ export default function ExtensionPage() {
         </div>
 
         {/* Ad Unit 2 - Vertical */}
-        <div className="bg-[#252526] rounded-lg p-2 border border-white/5">
+        <div className={`${cardBg} rounded-lg p-2 border ${border}`}>
           <ins
             className="adsbygoogle"
             style={{ display: "block", minHeight: "300px" }}
@@ -180,7 +215,7 @@ export default function ExtensionPage() {
         </div>
 
         {/* Ad Unit 3 - Auto */}
-        <div className="bg-[#252526] rounded-lg p-2 border border-white/5">
+        <div className={`${cardBg} rounded-lg p-2 border ${border}`}>
           <ins
             className="adsbygoogle"
             style={{ display: "block", minHeight: "250px" }}
@@ -192,7 +227,7 @@ export default function ExtensionPage() {
         </div>
 
         {/* Ad Unit 4 - Rectangle */}
-        <div className="bg-[#252526] rounded-lg p-2 border border-white/5">
+        <div className={`${cardBg} rounded-lg p-2 border ${border}`}>
           <ins
             className="adsbygoogle"
             style={{ display: "block", minHeight: "250px" }}
@@ -205,15 +240,15 @@ export default function ExtensionPage() {
       </div>
 
       {/* Footer */}
-      <footer className="p-3 border-t border-white/10 flex-shrink-0">
+      <footer className={`p-3 border-t ${border} flex-shrink-0`}>
         <div className="text-center">
-          <div className="text-[10px] text-gray-500 mb-2">
+          <div className={`text-[10px] ${textMuted} mb-2`}>
             Ads help keep AI free for everyone
           </div>
           <a 
             href="https://payless.chat" 
             target="_blank"
-            className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+            className={`text-xs ${textMuted} hover:${text} transition-colors underline`}
           >
             payless.chat
           </a>
@@ -225,9 +260,6 @@ export default function ExtensionPage() {
         @keyframes shimmer {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(100%); }
-        }
-        .animate-shimmer {
-          animation: shimmer 2s infinite;
         }
       `}</style>
     </div>
