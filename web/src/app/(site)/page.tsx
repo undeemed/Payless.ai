@@ -1,7 +1,7 @@
 export default function HomePage() {
-  // Supabase OAuth URL
+  // Supabase OAuth URL - redirects to /auth/callback which then goes to /dashboard
   const supabaseUrl = "https://bycsqbjaergjhwzbulaa.supabase.co";
-  const redirectTo = "https://payless.chat";
+  const redirectTo = "https://payless.chat/auth/callback";
   const signUpUrl = `${supabaseUrl}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectTo)}`;
 
   return (
