@@ -4,22 +4,26 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
-
-interface AdStats {
-  total_seconds_all_time: number;
-  total_credits_earned: number;
-  total_seconds_today: number;
-  credits_earned_today: number;
-  current_balance: number;
-  credits_per_minute: number;
-}
+import { api, type AdStatsResponse } from "@/lib/api";
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
-  const [stats, setStats] = useState<AdStats | null>(null);
+  const [stats, setStats] = useState<AdStatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
+
+  const fetchStats = async () => {
+    try {
+      const stats = await api.getAdStats();
+      setStats(stats);
+      setError(null);
+    } catch (err) {
+      console.error('Failed to fetch stats:', err);
+      setError('Failed to load stats. Make sure backend is running.');
+    }
+  };
 
   useEffect(() => {
     async function loadUser() {
@@ -33,20 +37,23 @@ export default function DashboardPage() {
       setUser(user);
       setLoading(false);
       
-      // TODO: Fetch stats from backend API when available
-      // For now, use placeholder data
-      setStats({
-        total_seconds_all_time: 0,
-        total_credits_earned: 100, // Welcome bonus
-        total_seconds_today: 0,
-        credits_earned_today: 0,
-        current_balance: 100,
-        credits_per_minute: 10,
-      });
+      // Fetch real stats from backend
+      await fetchStats();
     }
 
     loadUser();
   }, [router, supabase.auth]);
+
+  // Poll for updates every 5 seconds
+  useEffect(() => {
+    if (!user) return;
+
+    const interval = setInterval(() => {
+      fetchStats();
+    }, 5000); // Update every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [user]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -79,13 +86,30 @@ export default function DashboardPage() {
               Welcome back, {user?.user_metadata?.full_name || user?.email}
             </p>
           </div>
-          <button
-            onClick={handleSignOut}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Sign Out
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={fetchStats}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Refresh
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
+            {error}
+            <div className="mt-2 text-xs text-muted-foreground">
+              Backend URL: {process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000'}
+            </div>
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div className="grid md:grid-cols-3 gap-6 mb-12">
@@ -95,6 +119,11 @@ export default function DashboardPage() {
             <div className="text-sm text-muted-foreground mt-2">
               +{stats?.credits_per_minute ?? 10}/min while watching ads
             </div>
+            {stats && (
+              <div className="text-xs text-muted-foreground mt-1">
+                Updates every 5s
+              </div>
+            )}
           </div>
 
           <div className="bg-card border border-border rounded-xl p-6">
@@ -167,4 +196,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
