@@ -33,7 +33,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
-        {/* Google AdSense - Replace with your publisher ID */}
+        {/* Google AdSense verification */}
+        <meta name="google-adsense-account" content="ca-pub-6034027262191917" />
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6034027262191917"
