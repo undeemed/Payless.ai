@@ -35,7 +35,7 @@ export function Footer() {
             <h4 className="font-semibold mb-4">Resources</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link href="/docs" className="hover:text-foreground transition-colors">Documentation</Link></li>
-              <li><Link href="https://github.com/payless-ai/payless-ai" className="hover:text-foreground transition-colors">GitHub</Link></li>
+              <li><Link href="https://github.com/undeemed/Payless.ai" className="hover:text-foreground transition-colors">GitHub</Link></li>
               <li><Link href="/changelog" className="hover:text-foreground transition-colors">Changelog</Link></li>
               <li><Link href="/support" className="hover:text-foreground transition-colors">Support</Link></li>
             </ul>
